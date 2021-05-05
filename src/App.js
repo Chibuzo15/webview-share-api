@@ -9,14 +9,22 @@ function App() {
   const [file64, setFile64] = React.useState("");
   const [url, setUrl] = React.useState("");
 
+
+  //
+  const [imgPath, setImgPath] =  React.useState(undefined)
+
   const handleFileSelect = (event) => {
     // console.log("file select event is ", event);
     var file = event.target.files[0];
+
+    let filePath = (window.URL || window.webkitURL).createObjectURL(file);
+    console.log("path", filePath);
+    setImgPath(filePath)
+
     let reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      console.log("reader ", reader.result);
-      setFile64(reader.result)
+      setFile64(reader.result);
     };
     reader.onerror = function (error) {
       console.log("Error: ", error);
@@ -25,8 +33,13 @@ function App() {
 
   const handleShareButton = async () => {
     const blob = await (await fetch(file64)).blob();
-    const file = new File([blob], 'fileName.png', { type: blob.type });
+    const file = new File([blob], "fileName.png", { type: blob.type });
 
+    let filePath;
+    if (file64) {
+      filePath = (window.URL || window.webkitURL).createObjectURL(file);
+      console.log("path", filePath);
+    }
     // Check if navigator.share is supported by the browser
     if (navigator.share) {
       console.log("Congrats! Your browser supports Web Share API");
@@ -43,12 +56,11 @@ function App() {
         .catch(() => {
           console.log("Sharing failed");
         });
-    }
-     else if (window.ReactNativeWebView) {
+    } else if (window.ReactNativeWebView) {
       const shareObject = {
         subject: title,
         message: text,
-        url: file64,
+        url: imgPath,
         link: url,
       };
       window.ReactNativeWebView.postMessage(JSON.stringify(shareObject));
@@ -81,7 +93,7 @@ function App() {
         />
       </div>
       <div>
-        <div class="heading" >Url</div>
+        <div class="heading">Url</div>
         <input
           value={url}
           type="text"
@@ -127,6 +139,15 @@ function App() {
           </symbol>
         </defs>
       </svg>
+
+      {imgPath && <img
+      style={{
+        height: 300,
+        width: 300,
+        objectFit:'contain'
+      }}
+      src={imgPath}
+      />}
     </div>
   );
 }
