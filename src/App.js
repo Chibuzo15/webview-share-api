@@ -60,7 +60,7 @@ function App() {
       const shareObject = {
         subject: title,
         message: text,
-        url: imgPath,
+        url: file64,
         link: url,
       };
       window.ReactNativeWebView.postMessage(JSON.stringify(shareObject));
