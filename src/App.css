@@ -1,3 +1,15 @@
+input{
+  height: 35px;
+  border-radius: 12px;
+  padding: 6px;
+
+}
+
+.heading{
+  font-weight: bold;
+  font-size: 17px;
+}
+
 dy {
   font-family: -apple-system, BlinkMacSystemFont, San Francisco, Helvetica Neue,
     Helvetica, Ubuntu, Roboto, Noto, Segoe UI, Arial, sans-serif;
@@ -40,13 +52,17 @@ button:hover,
   border-color: #cdd;
 }
 
+.share-button{
+
+}
+
 .share-button,
 .copy-link {
   padding-left: 30px;
   padding-right: 30px;
 }
 
-.share-button,
+
 .share-dialog {
   position: absolute;
   top: 50%;

@@ -1,16 +1,41 @@
 import React from "react";
-import ReactDOM from "react-dom";
+// import ReactDOM from "react-dom";
 
 import "./App.css";
 
 function App() {
-  const handleShareButton = () => {
+  const [title, setTitle] = React.useState("");
+  const [text, setText] = React.useState("");
+  const [file64, setFile64] = React.useState("");
+  const [url, setUrl] = React.useState("");
+
+  const handleFileSelect = (event) => {
+    // console.log("file select event is ", event);
+    var file = event.target.files[0];
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      console.log("reader ", reader.result);
+      setFile64(reader.result)
+    };
+    reader.onerror = function (error) {
+      console.log("Error: ", error);
+    };
+  };
+
+  const handleShareButton = async () => {
+    const blob = await (await fetch(file64)).blob();
+    const file = new File([blob], 'fileName.png', { type: blob.type });
+
     // Check if navigator.share is supported by the browser
     if (navigator.share) {
       console.log("Congrats! Your browser supports Web Share API");
       navigator
         .share({
-          url: `https://share.toogoodtogo.com/store/1006/milestones/meals-saved/`
+          url,
+          title,
+          text,
+          files: [file],
         })
         .then(() => {
           console.log("Sharing successfull");
@@ -18,13 +43,61 @@ function App() {
         .catch(() => {
           console.log("Sharing failed");
         });
+    }
+     else if (window.ReactNativeWebView) {
+      const shareObject = {
+        subject: title,
+        message: text,
+        url: file,
+        link: url,
+      };
+      window.ReactNativeWebView.postMessage(JSON.stringify(shareObject));
     } else {
       console.log("Sorry! Your browser does not support Web Share API");
+      alert("Sorry! Your browser does not support Web Share API");
     }
   };
+
   return (
     <div className="App">
       <h1>React Web Share API</h1>
+
+      <div>
+        <div class="heading">Title</div>
+        <input
+          value={title}
+          type="text"
+          name="title"
+          onChange={(event) => setTitle(event.target.value)}
+        />
+      </div>
+      <div>
+        <div class="heading">Text</div>
+        <input
+          value={text}
+          type="text"
+          name="title"
+          onChange={(event) => setText(event.target.value)}
+        />
+      </div>
+      <div>
+        <div class="heading" >Url</div>
+        <input
+          value={url}
+          type="text"
+          name="url"
+          onChange={(event) => setUrl(event.target.value)}
+        />
+      </div>
+      <div>
+        <div class="heading">Select a file</div>
+        <input
+          // value={text}
+          type="file"
+          name="file"
+          onChange={handleFileSelect}
+        />
+      </div>
       <button
         onClick={handleShareButton}
         className="share-button"
@@ -34,7 +107,7 @@ function App() {
         <svg>
           <use href="#share-icon" />
         </svg>
-        <span>Share</span>
+        <span class="heading">Share</span>
       </button>
       <svg>
         <defs>
@@ -58,4 +131,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
