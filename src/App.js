@@ -6,40 +6,58 @@ import "./App.css";
 function App() {
   const [title, setTitle] = React.useState("");
   const [text, setText] = React.useState("");
+
+  const [files, setFiles] = React.useState([])
+
   const [file64, setFile64] = React.useState("");
+  const [fileArr64, setFileArr64] = React.useState([]);
   const [url, setUrl] = React.useState("");
 
-
   //
-  const [imgPath, setImgPath] =  React.useState(undefined)
+  // const [imgPath, setImgPath] = React.useState(undefined);
+  const [imgPathArr, setImgPathArr] = React.useState([]);
 
   const handleFileSelect = (event) => {
-    // console.log("file select event is ", event);
-    var file = event.target.files[0];
+    setFiles(event.target.files)
+    let fileArrObj = event.target.files;
+    let file64List = [];
+    let pathArr = [];
 
-    let filePath = (window.URL || window.webkitURL).createObjectURL(file);
-    console.log("path", filePath);
-    setImgPath(filePath)
+    for (let fileIndex = 0; fileIndex < fileArrObj.length; fileIndex++) {
+      let filePath = (window.URL || window.webkitURL).createObjectURL(
+        fileArrObj[fileIndex]
+      );
 
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setFile64(reader.result);
-    };
-    reader.onerror = function (error) {
-      console.log("Error: ", error);
-    };
+      pathArr.push(filePath);
+
+      let reader = new FileReader();
+      reader.readAsDataURL(fileArrObj[fileIndex]);
+      reader.onload = () => {
+        // setFile64(reader.result);
+        // console.log("about to push ", typeof reader.result);
+        file64List.push(reader.result);
+      };
+      reader.onerror = function (error) {
+        console.log("Error: ", error);
+      };
+    }
+
+    setFileArr64(file64List);
+    setImgPathArr(pathArr);
+
+    console.log("files are ", file64List);
+    console.log("blob links are ", pathArr);
   };
 
   const handleShareButton = async () => {
-    const blob = await (await fetch(file64)).blob();
-    const file = new File([blob], "fileName.png", { type: blob.type });
+    // const blob = await (await fetch(file64)).blob();
+    // const file = new File([blob], "fileName.png", { type: blob.type });
 
-    let filePath;
-    if (file64) {
-      filePath = (window.URL || window.webkitURL).createObjectURL(file);
-      console.log("path", filePath);
-    }
+    // let filePath;
+    // if (file64) {
+    //   filePath = (window.URL || window.webkitURL).createObjectURL(file);
+    //   console.log("path", filePath);
+    // }
     // Check if navigator.share is supported by the browser
     if (navigator.share) {
       console.log("Congrats! Your browser supports Web Share API");
@@ -48,7 +66,7 @@ function App() {
           url,
           title,
           text,
-          files: [file],
+          files: files,
         })
         .then(() => {
           console.log("Sharing successfull");
@@ -60,7 +78,7 @@ function App() {
       const shareObject = {
         subject: title,
         message: text,
-        url: file64,
+        urls: fileArr64,
         link: url,
       };
       window.ReactNativeWebView.postMessage(JSON.stringify(shareObject));
@@ -106,7 +124,9 @@ function App() {
         <input
           // value={text}
           type="file"
-          name="file"
+          id="files"
+          name="files"
+          multiple
           onChange={handleFileSelect}
         />
       </div>
@@ -140,14 +160,23 @@ function App() {
         </defs>
       </svg>
 
-      {imgPath && <img
-      style={{
-        height: 300,
-        width: 300,
-        objectFit:'contain'
-      }}
-      src={imgPath}
-      />}
+      {imgPathArr.length > 0 && (
+        <div>
+          {imgPathArr.map((each, index) => {
+            return (
+              <img
+                key={index}
+                style={{
+                  height: 100,
+                  width: 100,
+                  objectFit: "contain",
+                }}
+                src={each}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
